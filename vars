@@ -1,6 +1,7 @@
 #!/bin/bash
 
 export BASEDIR=/etc/sfw
+export PUB_IF=eth0
 
 # IPv4
 export IPT=/sbin/iptables

@@ -97,16 +97,18 @@ function do_enable_onboot {
     cat > $IFUP_HOOK <<EOF
 #!/bin/bash
 # DO NOT EDIT. Generated from script '$0' on `date`.
-
-$ENABLE_IPV4
-$ENABLE_IPV6
+if [ "$IFACE" == "$PUB_IF" ]; then
+    $ENABLE_IPV4
+    $ENABLE_IPV6
+fi
 EOF
     cat > $IFDOWN_HOOK <<EOF
 #!/bin/bash
 # DO NOT EDIT. Generated from script '$0' on `date`.
-
-$DISABLE_IPV4
-$DISABLE_IPV6
+if [ "$IFACE" == "$PUB_IF" ]; then
+    $DISABLE_IPV4
+    $DISABLE_IPV6
+fi
 EOF
 
     chmod 754 $IFUP_HOOK $IFDOWN_HOOK
