@@ -55,12 +55,12 @@ $IPT -A INPUT -p icmp --icmp-type echo-request -j ACCEPT
 $IPT -A OUTPUT -p icmp --icmp-type echo-request -j ACCEPT
 
 echo "[IPv4] Drop invalid packages"
-$IPT -A INPUT -m state --state INVALID -j LOG --log-prefix "iptables invalid: " --log-ip-options --log-tcp-options
+$IPT -A INPUT -m state --state INVALID -j LOG --log-prefix "iptables: invalid " --log-ip-options --log-tcp-options
 $IPT -A INPUT -m state --state INVALID -j DROP
-$IPT -A OUTPUT -m state --state INVALID -j LOG --log-prefix "iptables invalid: " --log-ip-options --log-tcp-options
+$IPT -A OUTPUT -m state --state INVALID -j LOG --log-prefix "iptables: invalid " --log-ip-options --log-tcp-options
 $IPT -A OUTPUT -m state --state INVALID -j DROP
 
 echo "[IPv4] Log everything else (psad)"
-$IPT -A INPUT -j LOG --log-prefix "iptables :"
-$IPT -A FORWARD -j LOG --log-prefix "iptables :"
+$IPT -A INPUT -j LOG --log-prefix "iptables: "
+$IPT -A FORWARD -j LOG --log-prefix "iptables: "
 
