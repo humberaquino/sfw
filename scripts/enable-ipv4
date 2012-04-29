@@ -35,7 +35,7 @@ echo "[IPv4] Allow access to services: ssh, http"
 #$IPT -A INPUT -p tcp -m state --state NEW -m limit --limit 30/minute --limit-burst 5 -j ACCEPT
 
 $IPT -A INPUT -p tcp --dport 22 --syn -m state --state NEW -j ACCEPT
-$IPT -A INPUT -p tcp --dport 80 --syn -m state --state NEW -j ACCEPT
+#$IPT -A INPUT -p tcp --dport 80 --syn -m state --state NEW -j ACCEPT
 
 echo "[IPv4] Allow access from the firewall"
 $IPT -A OUTPUT -p tcp --dport 21 --syn -m state --state NEW -j ACCEPT
