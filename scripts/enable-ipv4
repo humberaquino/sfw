@@ -1,0 +1,63 @@
+#!/bin/bash
+
+# Configuration and functions
+. /etc/sfw/vars
+. $BASEDIR/lib/common
+
+### Flush and clear existing rules
+### /proc/net/ip_tables_names has the list of current tables
+echo "[IPv4] Clear tables and set policies to DROP"
+$IPT -F
+$IPT -X
+$IPT -Z
+$IPT -t nat -F
+$IPT -t nat -X
+$IPT -t nat -Z
+$IPT -t mangle -F
+$IPT -t mangle -X
+$IPT -t mangle -Z
+$IPT -P INPUT DROP
+$IPT -P OUTPUT DROP
+$IPT -P FORWARD DROP
+
+### Load connection-tracking modules
+$MODPROBE ip_conntrack
+
+echo "[IPv4] Allow loopback"
+$IPT -A INPUT -i lo -j ACCEPT
+$IPT -A OUTPUT -o lo -j ACCEPT
+
+echo "[IPv4] Allow established and related packages"
+$IPT -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+$IPT -A OUTPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+echo "[IPv4] Allow access to services: ssh, http"
+#$IPT -A INPUT -p tcp -m state --state NEW -m limit --limit 30/minute --limit-burst 5 -j ACCEPT
+
+$IPT -A INPUT -p tcp --dport 22 --syn -m state --state NEW -j ACCEPT
+$IPT -A INPUT -p tcp --dport 80 --syn -m state --state NEW -j ACCEPT
+
+echo "[IPv4] Allow access from the firewall"
+$IPT -A OUTPUT -p tcp --dport 21 --syn -m state --state NEW -j ACCEPT
+$IPT -A OUTPUT -p tcp --dport 22 --syn -m state --state NEW -j ACCEPT
+$IPT -A OUTPUT -p tcp --dport 25 --syn -m state --state NEW -j ACCEPT
+$IPT -A OUTPUT -p tcp --dport 43 --syn -m state --state NEW -j ACCEPT
+$IPT -A OUTPUT -p tcp --dport 80 --syn -m state --state NEW -j ACCEPT
+$IPT -A OUTPUT -p tcp --dport 443 --syn -m state --state NEW -j ACCEPT
+$IPT -A OUTPUT -p tcp --dport 4321 --syn -m state --state NEW -j ACCEPT
+$IPT -A OUTPUT -p udp --dport 53 -m state --state NEW -j ACCEPT
+
+echo "[IPv4] Allow ICMP ping"
+$IPT -A INPUT -p icmp --icmp-type echo-request -j ACCEPT
+$IPT -A OUTPUT -p icmp --icmp-type echo-request -j ACCEPT
+
+echo "[IPv4] Drop invalid packages"
+$IPT -A INPUT -m state --state INVALID -j LOG --log-prefix "iptables invalid: " --log-ip-options --log-tcp-options
+$IPT -A INPUT -m state --state INVALID -j DROP
+$IPT -A OUTPUT -m state --state INVALID -j LOG --log-prefix "iptables invalid: " --log-ip-options --log-tcp-options
+$IPT -A OUTPUT -m state --state INVALID -j DROP
+
+echo "[IPv4] Log everything else (psad)"
+$IPT -A INPUT -j LOG --log-prefix "iptables :"
+$IPT -A FORWARD -j LOG --log-prefix "iptables :"
+

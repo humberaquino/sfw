@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# Configuration and functions
+. /etc/sfw/vars
+. $BASEDIR/lib/common
+
+echo "[IPv4] Clear tables and set policies to ACCEPT"
+### Flush and clear existing rules
+$IPT -F
+$IPT -X
+$IPT -Z
+$IPT -t nat -F
+$IPT -t nat -X
+$IPT -t nat -Z
+$IPT -t mangle -F
+$IPT -t mangle -X
+$IPT -t mangle -Z
+$IPT -P INPUT ACCEPT
+$IPT -P OUTPUT ACCEPT
+$IPT -P FORWARD ACCEPT
+
+exit 0

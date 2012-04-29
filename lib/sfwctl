@@ -1,0 +1,200 @@
+#!/bin/bash
+
+# Source configuration and common functions
+. /etc/sfw/vars
+. $BASEDIR/lib/common
+
+# Check required parameter
+[ -z "$1" ] && die "No parameter provided. Use 'help' to show usage"
+
+# Execute enable scripts
+function do_enable {
+    echo "[+] Enabling rules"
+    $ENABLE_IPV4
+    $ENABLE_IPV6
+}
+
+# Execute disable scripts 
+function do_disable {
+    echo "[+] Disabling rules"
+    $DISABLE_IPV4
+    $DISABLE_IPV6
+}
+
+function do_restore {
+    if [ ! -f $IFUP_RULES ] && [ ! -f $IFUP_RULES ]; then
+	echo "[+] Skiping restore. No existing rules"
+    else
+	if [ -f $IFUP_RULES ]; then
+	    echo "[+] Restoring $IFUP_RULES"
+	    $IPT_RESTORE < $IFUP_RULES
+	fi
+	if [ -f $IF6UP_RULES ]; then
+	    echo "[+] Restoring $IF6UP_RULES"
+	    $IP6T_RESTORE < $IF6UP_RULES
+	fi
+    fi
+
+}
+
+function do_save {
+    echo "[+] Saving rules to `dirname $IFUP_RULES`"
+    $IPT_SAVE -c > $IFUP_RULES
+    $IP6T_SAVE -c > $IF6UP_RULES
+}
+
+# If rules files exist the it do a restore. In other case it runs the enable script
+function do_start {
+    echo "[+] Stating fw"
+    if [ ! -f $IFUP_RULES ] || [ ! -f $IF6UP_RULES ]; then
+	echo "[+] No rules files yet. Creating them."
+	do_enable
+    else
+	echo "[+] Using existing rules"
+	do_restore
+    fi
+}
+
+# Save rules and after that run the disable scripts
+function do_stop {
+    echo "[+] Stopping fw"
+    do_save
+    do_disable
+}
+
+# Execute setup script and do_save
+function do_reload {
+    echo "[+] Reloading fw"
+    do_enable
+    do_save
+}
+
+function do_check {    
+    check_file_existence "$IPT" "[IPv4] iptables binary"
+    check_file_existence "$IPT_RESTORE" "[IPv4] iptables-restore binary"
+    check_file_existence "$IPT_SAVE" "[IPv4] iptables-save binary"
+    check_file_existence "$ENABLE_IPV4" "[IPv4] enable fw script"
+    check_file_existence "$DISABLE_IPV4" "[IPv4] disable fw script"
+    check_file_permissions "$ENABLE_IPV4" "[IPv4] enable fw script" 
+    check_file_permissions "$DISABLE_IPV4" "[IPv4] disable fw script"
+
+    check_file_existence "$IP6T" "[IPv6] iptables binary"
+    check_file_existence "$IP6T_RESTORE" "[IPv6] iptables-restore binary"
+    check_file_existence "$IP6T_SAVE" "[IPv6] iptables-save binary"
+    check_file_existence "$ENABLE_IPV6" "[IPv6] enable fw script"
+    check_file_existence "$DISABLE_IPV6" "[IPv6] disable fw script"
+    check_file_permissions "$ENABLE_IPV6" "[IPv6] enable fw script" 
+    check_file_permissions "$DISABLE_IPV6" "[IPv6] disable fw script"
+
+    check_file_existence "$MODPROBE" "modprobe binary"
+    check_file_existence "$IFUP_HOOK" "Network ifup hook script" "WARN"
+    check_file_existence "$IFDOWN_HOOK" "Network ifdown hook script" "WARN"
+}
+
+# Generate links to enable and disable scripts
+function do_enable_onboot {
+    echo "[+] Enable onboot hooks"
+    cat > $IFUP_HOOK <<EOF
+#!/bin/bash
+# DO NOT EDIT. Generated from script '$0' on `date`.
+
+$ENABLE_IPV4
+$ENABLE_IPV6
+EOF
+    cat > $IFDOWN_HOOK <<EOF
+#!/bin/bash
+# DO NOT EDIT. Generated from script '$0' on `date`.
+
+$DISABLE_IPV4
+$DISABLE_IPV6
+EOF
+
+    chmod 754 $IFUP_HOOK $IFDOWN_HOOK
+}
+
+function do_disable_onboot {
+    echo "[+] Disabling onboot hooks"
+    rm -f $IFUP_HOOK
+    rm -f $IFDOWN_HOOK
+}
+
+function do_status {
+    local _cmd="$IPT -L -v"
+    echo "=== [IPv4] $_cmd === "
+    eval $_cmd
+}
+
+function do_status_all {
+    do_status
+    echo
+    local _cmd="$IP6T -L -v"
+    echo "=== [IPv6] $_cmd === "
+    eval $_cmd
+}
+
+
+function show_help {
+    cat <<EOF
+
+ Usage:
+  $0 <action>
+
+  E.g.
+  $0 start
+
+ Actions:
+  enable: Run enable scripts
+  disable: Run disable scripts
+  restore: Restore rules
+  save: Save the rules
+
+  start|restore-enable: Do arestore if rules files exist. If no then run the enable script
+  stop|save-disable: Save and disable
+  reload|enable-save: Run enable script and then save
+  check: Chck required files and permissions
+
+  enable-onboot: Create hook scripts 
+  disable-onboot: Delete hook scripts 
+
+  help: Show this help
+
+EOF
+}
+
+check_rootness
+
+# Check action
+case $1 in 
+    enable|disable|restore|save|check)
+	do_$1
+	;;
+    start|restore-enable)
+	do_start
+	;;
+    stop|save-disable)
+	do_stop
+	;;
+    reload|enable-save)
+	do_reload
+	;;
+    enable-onboot)
+	do_enable_onboot
+	;;
+    disable-onboot)
+	do_disable_onboot
+	;;
+    status)
+	do_status
+	;;
+    status-all)
+	do_status_all
+	;;
+    help)
+	show_help
+	exit 0
+	;;
+    *)
+	die "Parameter '$1' not recognized. Exiting."
+	;;
+esac
+

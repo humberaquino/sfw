@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# Common functions
+
+function die {
+    echo "ERROR: $1"
+    exit 1
+}
+
+function check_rootness {
+    [ `/usr/bin/whoami` != 'root' ] && die "Only root can run this script"
+}
+
+function check_file_permissions {
+    if [ -x $1 ]; then
+	echo "[OK] $2 is executable: $1"
+    else
+	echo "[ERROR] $2 is NOT executable: $1"
+    fi
+}
+
+function check_file_existence {
+    local _prefix="ERROR"
+    [ ! -z "$3" ] && _prefix=$3
+    if [ -f $1 ]; then
+	echo "[OK] $2 exists: $1"
+    else
+	echo "[${_prefix}] $2 does NOT exist: $1"
+    fi
+}

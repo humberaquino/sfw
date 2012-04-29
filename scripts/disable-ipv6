@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# Configuration and functions
+. /etc/sfw/vars
+. $BASEDIR/lib/common
+
+echo "[IPv6] Clear tables and set policies to ACCEPT"
+$IP6T -F
+$IP6T -X
+$IP6T -Z
+$IP6T -t mangle -F
+$IP6T -t mangle -X
+$IP6T -t mangle -Z
+$IP6T -P INPUT ACCEPT
+$IP6T -P OUTPUT ACCEPT
+$IP6T -P FORWARD ACCEPT
+
+exit 0

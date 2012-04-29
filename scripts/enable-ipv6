@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# Configuration and functions
+. /etc/sfw/vars
+. $BASEDIR/lib/common
+
+### Load connection-tracking modules
+$MODPROBE ip_conntrack
+
+echo "[IPv6] Clear tables and set policies to DROP"
+$IP6T -F
+$IP6T -X
+$IP6T -Z
+$IP6T -t mangle -F
+$IP6T -t mangle -X
+$IP6T -t mangle -Z
+$IP6T -P INPUT DROP
+$IP6T -P OUTPUT DROP
+$IP6T -P FORWARD DROP
+
+echo "[IPv6] Only allow loopback"
+$IP6T -A INPUT -i lo -j ACCEPT
+$IP6T -A OUTPUT -o lo -j ACCEPT 

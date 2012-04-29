@@ -1,0 +1,26 @@
+#!/bin/bash
+
+export BASEDIR=/etc/sfw
+
+# IPv4
+export IPT=/sbin/iptables
+export IPT_RESTORE=/sbin/iptables-restore
+export IPT_SAVE=/sbin/iptables-save
+export IFUP_RULES=$BASEDIR/rules/ifup.rules
+export IFDOWN_RULES=$BASEDIR/rules/ifdown.rules
+export ENABLE_IPV4=$BASEDIR/scripts/enable-ipv4
+export DISABLE_IPV4=$BASEDIR/scripts/disable-ipv4
+
+#IPv6
+export IP6T=/sbin/ip6tables
+export IP6T_RESTORE=/sbin/ip6tables-restore
+export IP6T_SAVE=/sbin/ip6tables-save
+export IF6UP_RULES=$BASEDIR/rules/if6up.rules
+export IF6DOWN_RULES=$BASEDIR/rules/if6down.rules
+export ENABLE_IPV6=$BASEDIR/scripts/enable-ipv6
+export DISABLE_IPV6=$BASEDIR/scripts/disable-ipv6
+
+# Extra
+export MODPROBE=/sbin/modprobe
+export IFUP_HOOK=/etc/network/if-pre-up.d/fw
+export IFDOWN_HOOK=/etc/network/if-post-down.d/fw
