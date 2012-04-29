@@ -37,6 +37,8 @@ echo "[IPv4] Allow access to services: ssh, http"
 $IPT -A INPUT -p tcp --dport 22 --syn -m state --state NEW -j ACCEPT
 #$IPT -A INPUT -p tcp --dport 80 --syn -m state --state NEW -j ACCEPT
 
+echo "[IPv4] Allow git access"
+
 echo "[IPv4] Allow access from the firewall"
 $IPT -A OUTPUT -p tcp --dport 21 --syn -m state --state NEW -j ACCEPT
 $IPT -A OUTPUT -p tcp --dport 22 --syn -m state --state NEW -j ACCEPT
@@ -45,6 +47,7 @@ $IPT -A OUTPUT -p tcp --dport 43 --syn -m state --state NEW -j ACCEPT
 $IPT -A OUTPUT -p tcp --dport 80 --syn -m state --state NEW -j ACCEPT
 $IPT -A OUTPUT -p tcp --dport 443 --syn -m state --state NEW -j ACCEPT
 $IPT -A OUTPUT -p tcp --dport 4321 --syn -m state --state NEW -j ACCEPT
+$IPT -A OUTPUT -p tcp --dport 9418 --syn -m state --state NEW -j ACCEPT
 $IPT -A OUTPUT -p udp --dport 53 -m state --state NEW -j ACCEPT
 
 echo "[IPv4] Allow ICMP ping"
