@@ -21,7 +21,7 @@ $IPT -P OUTPUT DROP
 $IPT -P FORWARD DROP
 
 ### Load connection-tracking modules
-$MODPROBE ip_conntrack
+#$MODPROBE ip_conntrack
 
 echo "[IPv4] Allow loopback"
 $IPT -A INPUT -i lo -j ACCEPT

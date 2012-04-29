@@ -86,7 +86,7 @@ function do_check {
     check_file_permissions "$ENABLE_IPV6" "[IPv6] enable fw script" 
     check_file_permissions "$DISABLE_IPV6" "[IPv6] disable fw script"
 
-    check_file_existence "$MODPROBE" "modprobe binary"
+    #check_file_existence "$MODPROBE" "modprobe binary"
     check_file_existence "$IFUP_HOOK" "Network ifup hook script" "WARN"
     check_file_existence "$IFDOWN_HOOK" "Network ifdown hook script" "WARN"
 }

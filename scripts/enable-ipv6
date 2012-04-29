@@ -5,7 +5,7 @@
 . $BASEDIR/lib/common
 
 ### Load connection-tracking modules
-$MODPROBE ip_conntrack
+#$MODPROBE ip_conntrack
 
 echo "[IPv6] Clear tables and set policies to DROP"
 $IP6T -F

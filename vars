@@ -21,6 +21,6 @@ export ENABLE_IPV6=$BASEDIR/scripts/enable-ipv6
 export DISABLE_IPV6=$BASEDIR/scripts/disable-ipv6
 
 # Extra
-export MODPROBE=/sbin/modprobe
-export IFUP_HOOK=/etc/network/if-pre-up.d/fw
-export IFDOWN_HOOK=/etc/network/if-post-down.d/fw
+#export MODPROBE=/sbin/modprobe
+export IFUP_HOOK=/etc/network/if-pre-up.d/sfw
+export IFDOWN_HOOK=/etc/network/if-post-down.d/sfw
